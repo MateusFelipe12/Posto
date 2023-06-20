@@ -10,7 +10,7 @@
         // se busca um arquivo
         // extensões liberadas
         $file = explode('?',REQUEST_URI )[0];
-        $allowedExtensions = ['css', 'js'];
+        $allowedExtensions = ['css', 'js', 'woff2', 'ttf'];
         $requestedFile = 'C:/xampp/htdocs'. $file ;
         
         // pega o ultimo conteudo depois do . ex: pega apenas .js
@@ -24,38 +24,40 @@
             readfile($requestedFile);
             die();
         } else {
-            echo('URL NÃO ENCONTRADA');
+            echo('URL NÃO ENCONTRADA'.$extension);
             die();
         }
     }
 
     // faz o logout e vai pra pagina inicial
     if(REQUEST_URI == '/logout'){
-        unset($_SESSION['email']);
-        unset($_SESSION['permission']);
-        unset($_SESSION['name']);
-
-        header('Content-Type: text/html'); 
-        die(file_get_contents('./index.html').
-            '<script>$.toast(\'Deslogou\');goTo(\'/login\')</script></body>'
-        );
+        require('./Controller/userController.php');
     }
      
     if( !isset($_GET['get']) ){
         $content = file_get_contents('./index.html');
+        if(isset($_SESSION['email'])){
+            $content .= '<script>window.user = {email:\''.$_SESSION['email'].'\'};console.log(user)</script>';
+        }
+        
         header('Content-Type: text/html'); 
         die($content);
     }
 
 
     if(isset($_GET['action'])){
-        switch ($_GET['action']) {
-            case 'login':
-            case 'register':
+        switch ($_GET['item']) {
+            case 'user':
                 if(isset($_SESSION['email'])){
                     response(['js'=> 'goTo("/")']);
                 }
-                require_once('./Controller/UserController.php');
+                require_once('./Controller/userController.php');
+            break;
+            case 'measure':
+                if(!isset($_SESSION['email']) || !$_SESSION['email']){
+                    response(['js'=> 'goTo("/")']);
+                }
+                require_once('./Controller/measureController.php');
             break;
         }
     }
@@ -63,27 +65,31 @@
     switch (true) {
         case REQUEST_URI == '/registre-se':
             if(isset($_SESSION['email'])){
-                response(['page'=>file_get_contents('./index.html')]);
+                response(['page'=>get_content('./View/home.html')]);
             }
-            response(['page' => file_get_contents('./View/userRegister.html')]);
-        break;
+            response(['page' => get_content('./View/userRegister.html')]);
+
+            break;
         case REQUEST_URI == '/login':
             if(isset($_SESSION['email'])){
-                response(['page'=>file_get_contents('./index.html')]);
+                response(['page'=>get_content('./View/home.html')]);
             }
-
-            response(['page' => file_get_contents('./View/userLogin.html')]);
+            response(['page' => get_content('./View/userLogin.html')]);
 
         break;
         case REQUEST_URI == '/' && $_SESSION['email']:
-            require_once('./index.html');
-
-
+            response(['page'=>get_content('./View/home.html')]);
+        break;
+        case REQUEST_URI == '/produtos' && $_SESSION['email']:
+            require_once('./Controller/productController.php');
+        break;
+        case REQUEST_URI == '/unidades-medida' && $_SESSION['email']:
+            require_once('./Controller/measureController.php');
         break;
         default:
             if(!sizeof($_GET)){
                 if(isset($_SESSION['email'])){
-                    response(['page' => require_once('./index.html')]);
+                    response(['page' => get_content('./index.html')]);
                 } else{
                     header('Location: /login');
                 }

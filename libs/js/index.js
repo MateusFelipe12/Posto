@@ -15,7 +15,6 @@ $.toast = (text, type='') => {
             style.background = '#0dcaf0'
         break;
     }
-    console.log(type, style)
 
     Toastify({
         text: text,
@@ -64,38 +63,54 @@ const forDoAjax = () => {
 
     $('body').on('click', 'a', function(e){
         e.preventDefault();
+        console.log(this)
         let url = $(this).attr('href')
         goTo(url);
         return false
     })
 
-    $.get('/login?get=1', '', (e)=>{handleResponse(e)});
+    $('body').on('click', 'button', function(e){
+        let url = $(this).attr('href')
+        if(!url) return true; // é de formulário
+
+        console.log(this)
+        e.preventDefault();
+        $.post(url+'&get=1', '', (e)=>{handleResponse(e)});
+        return false
+    })
+
+    if( window.user && window.user.email.length ){
+        $.get(window.location.pathname+'?get=1', '', (e)=>{handleResponse(e)});
+    } else{
+        $.get('/login?get=1', '', (e)=>{handleResponse(e)});
+    }
 }
 
-const handleResponse = function (e){
+function handleResponse(e) {
     console.log(e);
     Object.keys(e).forEach(content => {
         switch (content) {
             case 'js':
-                eval(e[content])
-            break;
-            case 'html': 
+                eval(e[content]);
+                break;
+            case 'html':
                 $('html body').append(e[content]);
-            break;
-            case 'page': 
+                break;
+            case 'page':
             default:
-                if(e[content].length > 1){
+                if (e[content].length > 1) {
                     $('html body #root').html(e[content]);
-                } else{
+                } else {
                     $('html body #root').html(e);
                 }
-            break;
+                break;
         }
     });
 
 }
 
 const goTo = function(path='/'){
+    console.log(path)
     $.get(path+'?get=1','', function(e){handleResponse(e)});
     window.history.pushState({page: path}, '', path);
 }
@@ -107,8 +122,6 @@ window.addEventListener('popstate', function (event) {
 
 const onload = function () {
     forDoAjax();
-
-
 
 };
 

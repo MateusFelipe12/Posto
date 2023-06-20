@@ -43,8 +43,8 @@ label{
 
 /* ESPAÇO ABAIXO */
 body{
-    padding-bottom: 100px;
-    padding-top: 100px;
+    min-height: 100vh;
+    padding-bottom: 80px;
 }
 
 
@@ -59,7 +59,7 @@ body{
     font-style: normal;
     font-weight: 400;
     font-display: swap;
-    src: url('../fonts/Montserrat-Regular.ttf') format('truetype');
+    src: url('../fonts/Montserrat-Regular.ttf?file=1') format('truetype');
 }
 
 @font-face {
@@ -67,5 +67,5 @@ body{
     font-style: normal;
     font-weight: 700;
     font-display: swap;
-    src: url('../fonts/Montserrat-Bold.ttf') format('truetype');
+    src: url('../fonts/Montserrat-Bold.ttf?file=1') format('truetype');
 }

@@ -1,6 +1,24 @@
 <?php
     require_once('config.php');
 
+    if(REQUEST_URI == '/logout'){
+        $return = file_get_contents('./index.html');
+        $return .= '<script>delete window.user</script>';
+
+        if(isset($_SESSION['email']) && $_SESSION['email']){
+            $return .= '<script>$.toast(\'Deslogou\');goTo(\'/login\')</script></body>';
+        } else{
+            $return .= '<script>goTo(\'/login\')</script></body>';
+        }
+
+        unset($_SESSION['email']);
+        unset($_SESSION['permission']);
+        unset($_SESSION['name']);
+
+        header('Content-Type: text/html');
+        die($return);
+    }
+
     switch (true) {
         case $_GET['action'] == 'register':        
             extract($_POST);
@@ -54,7 +72,10 @@
                         $_SESSION['name'] = $result['name'];
                         $name = $result['name'];
                         
-                        response(['js'=>'$.toast(\'Seja bem vindo(a) '.$name.'\',\'success\');goTo(\'/\')']);
+                        $js = '$.toast(\'Seja bem vindo(a) '.$name.'\',\'success\');';
+                        $js .= 'goTo(\'/\');';
+                        $js .= 'window.user = {email:\''.$_SESSION['email'].'\'};';
+                        response(['js'=>$js]);
                     }
                 }
                 response(['js'=>'$.toast(\'Verifique E-mail e Senha\',\'error\');goTo(\'/login\')']);

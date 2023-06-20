@@ -1,0 +1,22 @@
+<div class="container py-5">
+	<div class="row justify-content-center">
+		<div class="col-lg-6">
+			<form action="?item=measure&action=add" method="post">
+				<div class="form-group">
+                    <textarea class="form-control" name="description" rows="2" required placeholder="Descrição"></textarea>
+				</div>
+				<div class="form-group">
+					<input name="symbol" class="form-control" type="text" required placeholder="Simbolo">
+				</div>
+				<div class="form-group">
+                    <label for="fractions-input">É possivel fracionar?</label>
+                    <input type="hidden" name="fractions" value="0" checked>
+                    <input type="checkbox" name="fractions" value="1" id="fractions-input">
+				</div>
+				<div class="form-group">
+					<button class="btn btn-success" type="submit">Adicionar</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
