@@ -69,14 +69,16 @@ const forDoAjax = () => {
         return false
     })
 
-    $('body').on('click', 'button', function(e){
+    $('body').on('click', 'button:not([content_modal])', function(e){
         let url = $(this).attr('href')
-        if(!url) return true; // é de formulário
-
-        console.log(this)
-        e.preventDefault();
-        $.post(url+'&get=1', '', (e)=>{handleResponse(e)});
-        return false
+        console.log(url)
+        if(url){
+            console.log(this)
+            e.preventDefault();
+            $.post(url+'&get=1', '', (e)=>{handleResponse(e)});
+            return false
+        } 
+        // return true; // é de formulário
     })
 
     if( window.user && window.user.email.length ){
@@ -109,10 +111,46 @@ function handleResponse(e) {
 
 }
 
+const modal_component = () => {
+
+    $('body').on('click', 'button[content_modal]:not(.ok)', function(e){
+        let btn = $(this)
+        let url = btn.attr('content_modal')
+        if(!url) return true;
+        console.log(url+'&get=1');
+
+        $.get(url+'&get=1', '', function(e){
+            let content = e.html;
+            let id = window.counter ? ++window.counter : window.counter = 1;
+            console.log(id)
+            let modal = `
+                <div class="modal fade" id="modal-${id}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-body">${content}</div>
+                        </div>
+                    </div>
+                </div>`
+            
+                $('body #root').append(modal)
+                btn.attr('data-bs-target', '#modal-'+id)
+                btn.attr('data-bs-toggle', 'modal');
+                $('#modal-'+id).modal('show')
+                btn.addClass('ok');
+        })
+
+    })
+}
+
 const goTo = function(path='/'){
     console.log(path)
+
+    $('.modal').modal('hide');
+    $('.collapse').collapse('hide');
+
     $.get(path+'?get=1','', function(e){handleResponse(e)});
     window.history.pushState({page: path}, '', path);
+
 }
 
 window.addEventListener('popstate', function (event) {
@@ -122,6 +160,7 @@ window.addEventListener('popstate', function (event) {
 
 const onload = function () {
     forDoAjax();
+    modal_component();
 
 };
 

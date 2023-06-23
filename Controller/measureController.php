@@ -35,7 +35,7 @@
             break;
 
             case 'edit':
-                $id = $_GET['id'];
+                // $id = $_GET['id'];
                 extract($_POST);
 
                 if( !isset( $id ) ||  
@@ -96,8 +96,9 @@
                         response(['js'=>$js]);
                     }
 
-                    $js = '$.toast(\'Ocorreu um erro ao deletar, recarregue a página!\', \'success\');';
-                    response(['js'=>'console.log(\''.$sql.'\')']);
+                    $js = '$.toast(\'Ocorreu um erro ao deletar, recarregue a página!\', \'error\');';
+                    $js .= 'console.log(\''.$sql.'\')';
+                    response(['js'=>$js]);
 
                 } else{
                     $js = '$.toast(\'Registro não encontrado, recarregue a página!\', \'warning\');';
@@ -110,6 +111,49 @@
             default:
                 $js = '$.toast(\'Ocorreu um erro, recarregue a pagina\', \'warning\');';
                 response(['js'=>$js]);
+            break;
+        }
+    }
+
+    if(isset($_GET['component'])){
+        switch($_GET['component']){
+            case 'edit':
+                $id = $_GET['id'];
+
+                if( ! isset($id) || !is_numeric($id) ) response(['js'=>'$.toast(\'Ops, ocorreu um erro, recarregue a pagina!\',\'warning\')']);
+
+                $sql = 'SELECT * FROM unit_measure where id = '.$id;
+                
+                $result = $conn->query($sql);
+                $result = $result->fetch_assoc();
+
+                if( $result['id'] ){
+                    $html = form_padrao([
+                        'fields' =>[
+                            [
+                                '', 'textarea', 'description', $result['description'], 'placeholder="Descrição"' ,''
+                            ],
+                            [
+                                '', 'text', 'symbol', $result['symbol'], 'placeholder="Simbolo"' ,''
+                            ],
+                            [
+                                'Fracionavel', 'checkbox', 'fractions', $result['fractions'] ,''
+                            ],
+                            [
+                                '', 'hidden', 'id', $result['id'] ,''
+                            ]
+                        ],
+                        'action' =>'?item=measure&action=edit',
+                        'button' => btn('Salvar', 'btn-success')
+                    ]);
+
+                    response(['html' => $html]);
+
+                } else{
+                    $js = '$.toast(\'Registro não encontrado, recarregue a página!\', \'warning\');';
+                    $js .= 'console.log(\''.$sql.'\')';
+                    response(['js'=>$js]);
+                }
             break;
         }
     }
@@ -155,18 +199,13 @@
     }
 
 
-
-
-
 function getListMeasures($permission='read'){
-    require('config.php');
-    $sql = 'select * from unit_measure;';
-    $result = $conn->query($sql);
+    $result = getItem('unit_measure');
 
     $items = '';
-    if($result && $result->num_rows > 0){
+    if($result){
         $options = '';
-        while( $row = $result->fetch_assoc() ) {
+        foreach($result as $row ) {
             switch($permission){
                 case 'full':
                 case 'edit': 
@@ -181,6 +220,9 @@ function getListMeasures($permission='read'){
                                 <div class="col-2">
                                     <button href="/unidades-medida/?item=measure&action=delete&id='.$row['id'].'" class="btn-danger p-1">
                                         <i class="bi bi-trash"></i>
+                                    </button>
+                                    <button content_modal="/unidades-medida?item=measure&component=edit&id='.$row['id'].'"  class="btn-success p-1">
+                                        <i class="bi bi-pencil"></i>
                                     </button>
                                 </div>
                             </div>

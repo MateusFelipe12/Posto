@@ -18,7 +18,7 @@
 }
 
 /* PADRÃO DOS INPUTS */
-.form-control{
+.form-control, .form-select{
     border-radius: 5px;
     border: 1px solid rgb(33, 150, 243);
     box-shadow: 0 0 2px 1px rgba(33, 150, 243, 0.5);

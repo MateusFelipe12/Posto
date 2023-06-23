@@ -1,14 +1,29 @@
 <div class="container py-5">
-	<div class="row justify-content-center">
-		<div class="col-lg-6">
-			<form action="?item=products&action=add" method="post">
-				<div class="form-group">
-					<input name="email" class="form-control" type="text" required placeholder="E-mail">
-				</div>
-				<div class="form-group">
-					<button class="btn btn-success" type="submit">Entrar</button>
-				</div>
-			</form>
+	<div class="row">
+		<div class="col-lg-6" id="all-collapses">
+			<div class="collapse show" id="collapse-add-prods" data-bs-parent="#all-collapses">
+				<button class="btn btn-info"  data-bs-toggle="collapse" data-bs-target="#collapse-add-prods">Adicionar Produtos</button	>
+			</div>
+			<div class="collapse" id="collapse-add-prods" data-bs-parent="#all-collapses">
+				<form action="?item=product&action=add" method="post">
+					<div class="form-group">
+						<textarea class="form-control" name="description" rows="2" required placeholder="Descrição"></textarea>
+					</div>
+					<div class="form-group">
+						<input class="form-control" type="number" name="stock" required placeholder="Estoque Inicial">
+					</div>
+					{select-measures}
+					<div class="form-group">
+						<input class="form-control" type="text" name="value" required placeholder="Valor">
+					</div>
+					<div class="form-group">
+						<button class="btn btn-success" type="submit">Adicionar</button>
+					</div>
+				</form>
+			</div>
+		</div>
+		<div class="col-12">
+			<div id="list-products">{list_products}</div>
 		</div>
 	</div>
 </div>

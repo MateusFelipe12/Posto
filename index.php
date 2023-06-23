@@ -4,7 +4,7 @@
     define('PARCIAL_TOKEN', 'Senha forte: ');
     // die('opa');
     require_once('./lib.php');
-    
+    // response(['html' => json_encode($_GET)]);
     // TRATANDO REQUISIÇÕES DE ARQUIVOS JS E CSS
     if(isset($_GET['file'])  && $_GET['file']){
         // se busca um arquivo
