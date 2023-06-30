@@ -1,0 +1,112 @@
+<div class="container py-5">
+	<div class="row">
+		<div class="col-lg-6" id="all-collapses">
+			<div class="collapse show mb-3" id="collapse-add-provider" data-bs-parent="#all-collapses">
+				<button class="btn btn-info"  data-bs-toggle="collapse" data-bs-target="#collapse-add-provider">Adicionar Fornecedor</button	>
+			</div>
+			<div class="collapse mb-3" id="collapse-add-provider" data-bs-parent="#all-collapses">
+				<form action="?item=provider&action=add" method="post">
+                    <div class="row">
+                        <div class="col-12">
+                            <small>Informações do fornecedor</small>
+                            <div class="form-group">
+                                <input class="form-control" type="text" name="name_fantasy" required placeholder="Nome Fantasia">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group">
+                                <input class="form-control" type="text" name="corporate_name"  placeholder="Razão Social">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <input class="form-control" type="text" name="cnpj" required placeholder="CNPj">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <input class="form-control" type="text" name="state_registration" placeholder="Inscrição Estadual">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <small>Informações da conta</small>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <input class="form-control" type="text" name="agency" required placeholder="Agencia">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <input class="form-control" type="text" name="account" required placeholder="Conta">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <small>Endereço</small>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <input class="form-control" type="text" name="cep" required placeholder="Cep">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <input class="form-control" type="text" name="street" placeholder="Rua">
+                            </div>
+                        </div>
+                        <div class="col-6"> 
+                            <div class="form-group">
+                                <input class="form-control" type="text" name="neighborhood" placeholder="Bairro">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <input class="form-control" type="text" name="city" placeholder="Cidade">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <input class="form-control" type="text" name="uf" placeholder="Estado">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <input class="form-control" type="text" name="country" placeholder="País">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <small>Contatos</small>
+                        </div>
+                        <div class="col-6">
+                            <span class="d-flex justify-content-end mb-2">
+                                <button type="button" id="add-new-contact-provider" class="btn btn-sm btn-success">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                            </span>
+                        </div>
+                        <div class="col-6 form-contacts">
+                            <div class="form-group">
+                                <select class="form-select" name="TYPE_CONTACTS[]">
+                                    <option value="" selected disabled>Tipo de contato</option>
+                                    <option value="email">E-mail</option>
+                                    <option value="telephone">Telefone</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-6 form-contacts">
+                            <div class="form-group">
+                                <input class="form-control" type="text" name="CONTACTS[]" placeholder="Contato">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-success">Adicionar</button>
+                    </div>
+				</form>
+			</div>
+		</div>
+		<div class="col-12">
+			<div id="list-providers">{list_providers}</div>
+		</div>
+	</div>
+</div>

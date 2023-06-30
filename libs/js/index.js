@@ -63,22 +63,19 @@ const forDoAjax = () => {
 
     $('body').on('click', 'a', function(e){
         e.preventDefault();
-        console.log(this)
         let url = $(this).attr('href')
         goTo(url);
         return false
     })
 
-    $('body').on('click', 'button:not([content_modal])', function(e){
+    $('body').on('click', 'button:not([content_modal])[href]', function(e){
         let url = $(this).attr('href')
-        console.log(url)
         if(url){
-            console.log(this)
             e.preventDefault();
             $.post(url+'&get=1', '', (e)=>{handleResponse(e)});
             return false
-        } 
-        // return true; // é de formulário
+        }
+        return true; // é de formulário
     })
 
     if( window.user && window.user.email.length ){
@@ -89,7 +86,6 @@ const forDoAjax = () => {
 }
 
 function handleResponse(e) {
-    console.log(e);
     Object.keys(e).forEach(content => {
         switch (content) {
             case 'js':
@@ -117,12 +113,10 @@ const modal_component = () => {
         let btn = $(this)
         let url = btn.attr('content_modal')
         if(!url) return true;
-        console.log(url+'&get=1');
 
         $.get(url+'&get=1', '', function(e){
             let content = e.html;
             let id = window.counter ? ++window.counter : window.counter = 1;
-            console.log(id)
             let modal = `
                 <div class="modal fade" id="modal-${id}" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog">
@@ -143,7 +137,6 @@ const modal_component = () => {
 }
 
 const goTo = function(path='/'){
-    console.log(path)
 
     $('.modal').modal('hide');
     $('.collapse').collapse('hide');
@@ -157,11 +150,25 @@ window.addEventListener('popstate', function (event) {
     goTo(event.state.page)
 })
 
+const addContacts = function(){
+    let html_add_contact = '';
+    $('body').on('click', '#add-new-contact-provider', function(){
+        if(!html_add_contact.length){
+            $(this).closest('form').find('.form-contacts').each(function(){
+                let classes = $(this).attr('class');
+                html_add_contact += `<div class="${classes}">${
+                    $(this).html()
+                }</div>`;
+            })
+        }
+        $(this).closest('form').find('.row').append(html_add_contact);
+    })
+}
 
 const onload = function () {
     forDoAjax();
     modal_component();
-
+    addContacts();
 };
 
 

@@ -2,20 +2,14 @@
 	<div class="row">
 		<div class="col-lg-6" id="all-collapses">
 			<div class="collapse show mb-3" id="collapse-add-prods" data-bs-parent="#all-collapses">
-				<button class="btn btn-info"  data-bs-toggle="collapse" data-bs-target="#collapse-add-prods">Adicionar Produtos</button	>
+				<button class="btn btn-info"  data-bs-toggle="collapse" data-bs-target="#collapse-add-prods">Novo fornecimento</button	>
 			</div>
 			<div class="collapse mb-3" id="collapse-add-prods" data-bs-parent="#all-collapses">
-				<form action="?item=product&action=add" method="post">
-					<div class="form-group">
-						<textarea class="form-control" name="description" rows="2" required placeholder="Descrição"></textarea>
-					</div>
+				<form action="?item=supply&action=add" method="post">
 					<div class="form-group">
 						<input class="form-control" type="number" name="stock" required placeholder="Estoque Inicial">
 					</div>
-					{select-measures}
-					<div class="form-group">
-						<input class="form-control" type="text" name="value" required placeholder="Valor">
-					</div>
+					{select-providers}
 					<div class="form-group">
 						<button class="btn btn-success" type="submit">Adicionar</button>
 					</div>
@@ -23,7 +17,7 @@
 			</div>
 		</div>
 		<div class="col-12">
-			<div id="list-products">{list_products}</div>
+			<div id="list-supplies">{list_supplies}</div>
 		</div>
 	</div>
 </div>

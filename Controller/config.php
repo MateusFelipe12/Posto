@@ -1,5 +1,12 @@
 <?php
-    $conn = new mysqli('localhost', 'api', 'postodegasolina123', 'posto');
+    // $conn = new mysqli('localhost', 'server', 'postodegasolina123', 'posto');
+
+    if(isset($_SESSION['email']) && isset($_SESSION['permission']) && $_SESSION['permission'] != ''){
+        $conn = new mysqli('localhost', $_SESSION['email'], $_SESSION['password'], 'posto');
+    } else{
+        $conn = new mysqli('localhost', 'server', 'postodegasolina123', 'posto');
+    }
+
     if ($conn->connect_error) {
         die("Falha na conexão: " . $conn->connect_error);
     }

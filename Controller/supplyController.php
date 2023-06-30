@@ -191,27 +191,26 @@
     switch($_SESSION['permission']){
         case 'edit': 
         case 'full': 
-            $page = get_content('./View/productAdd.html');
+            $page = get_content('./View/supplyAdd.html');
+            $list_providers = getItem('provider');
             
-            $list_measures = getItem('unit_measure');
-            
-            $options_measures = [['', 'Selecione a unidade de medida']];
-            foreach ($list_measures as  $value) {
-                $options_measures[] = [$value['id'], $value['description']];
+            $options_provider = [['', 'Selecione o fornecedor']];
+            foreach ($list_providers as  $provider) {
+                $options_provider[] = [$provider['id'], $provider['name_fantasy']];
             }
 
-            $select_measures = 
+            $select_providers = 
                 input([
                     '', 
                     'select',
-                    'measures_unit_code',
+                    'id_provider',
                     '',
-                    $options_measures
+                    $options_provider
                 ]);
 
-            $list_products = getListProduct($_SESSION['permission']);
-            $page = str_replace('{select-measures}', $select_measures, $page) ;
-            $page = str_replace('{list_products}', $list_products, $page) ;
+            $list_products = getListSupply($_SESSION['permission']);
+            $page = str_replace('{select-providers}', $select_providers, $page) ;
+            $page = str_replace('{list_supplies}', $list_products, $page) ;
             
             $page = get_content('./View/home.html').'
                 <div class="container">
@@ -222,29 +221,14 @@
 
             response(['page'=>$page]);
         break; 
-        
-        case 'read': 
-            $list_products = getListProduct($_SESSION['permission']);
-            $page = $list_products;
-            
-            $page = get_content('./View/home.html').'
-                <div class="container">
-                    <div class="row justify-content-center">
-                        <div class="col-10">'.$page.'</div>
-                    </div>
-                <div>';
-    
-            response(['page'=>$page]);
-                
-            
-        break; 
+
         default:
-            response(['page'=>get_content('./pageNotFound.html')]);
+            response(['page'=>get_content('./View/pageNotFound.html')]);
         break; 
     }
 
 
-    function getListProduct($permission){
+    function getListSupply($permission){
         $result = getItem('unit_measure');
         $UNIT_MEASURES = [];
         foreach ($result as $value) {

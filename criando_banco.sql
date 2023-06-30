@@ -83,12 +83,13 @@ CREATE TABLE product (
     CONSTRAINT fk_unit_measure_to_product FOREIGN KEY (id_unit_measure) REFERENCES unit_measure(id)
 );
 
--- VENDA
-CREATE TABLE sale(
+CREATE TABLE sale (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
     date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     value_total NUMERIC(8,2) NOT NULL DEFAULT 0,
-    quantity_parcels NUMERIC(2,0) NOT NULL DEFAULT 1
+    quantity_parcels NUMERIC(2,0) NOT NULL DEFAULT 1,
+    person_id INTEGER,
+    CONSTRAINT fk_person_to_sale  FOREIGN KEY (person_id) REFERENCES person(id)
 );
 
 -- PARCELA
@@ -130,3 +131,23 @@ CREATE TABLE user (
 );
 
 
+
+
+
+-- criando usuarios
+-- user principal, pode fazer o crud completo
+ CREATE USER 'mateusrauber3@gmail.com'@'localhost' IDENTIFIED BY '123';
+ GRANT SELECT, INSERT, UPDATE, DELETE ON posto.* TO 'mateusrauber3@gmail.com'@'localhost';
+
+-- user basico, pode fazer apenas login e criar usuarios
+ CREATE USER 'server'@'localhost' IDENTIFIED BY 'postodegasolina123';
+ GRANT SELECT, INSERT ON posto.user TO 'server'@'localhost';
+
+ 
+--  user apenas de leitura
+ CREATE USER 'read'@'localhost' IDENTIFIED BY '123';
+ GRANT SELECT ON posto.* TO 'read'@'localhost';
+
+
+--  CREATE USER 'read'@'localhost' IDENTIFIED BY '123';
+--  GRANT SELECT ON posto.* TO 'read'@'localhost';

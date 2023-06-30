@@ -11,7 +11,7 @@
                     !isset($symbol) || 
                     !strlen(trim($description)) || 
                     !strlen(trim($symbol))
-                ) response(['js'=>'$.toast(\'Informe Descrição e Simbolo!\',\'error\')']);
+                ) response(['js'=>'$.toast(\'Informe Descrição e Simbolo!\',\'warning\')']);
 
                 $sql = 'INSERT INTO unit_measure(description, symbol, fractions) VALUES ';
                 $sql .= '("'.$description.'", "'.$symbol.'" ';
@@ -29,13 +29,14 @@
                     $js .= 'goTo(window.location.pathname);';
                     response(['js'=>$js]);
                 } else{
-                    response(['js'=>'console.log(\''.$sql.'\')']);
+                    $js = '$.toast(\'Ocorreu um erro ao inserir, \'success\');';
+                    $js = 'console.log(\''.$sql.'\')';
+                    response(['js'=>$js]);
                 }
 
             break;
 
             case 'edit':
-                // $id = $_GET['id'];
                 extract($_POST);
 
                 if( !isset( $id ) ||  
@@ -66,7 +67,8 @@
                     }
 
                     $js = '$.toast(\'Ocorreu um erro ao deletar, recarregue a página!\', \'success\');';
-                    response(['js'=>'console.log(\''.$sql.'\')']);
+                    $js = 'console.log(\''.$sql.'\');';
+                    response(['js'=>$js]);
 
                 } else{
                     $js = '$.toast(\'Registro não encontrado, recarregue a página!\', \'warning\');';
@@ -158,7 +160,7 @@
         }
     }
 
-    switch($_SESSION['permission'] = 'full'){
+    switch($_SESSION['permission']){
         case 'edit': 
         case 'full': 
             $page = file_get_contents('./View/home.html');
@@ -177,29 +179,25 @@
         break; 
 
         case 'read':
-        case 'full':
-            $page = file_get_contents('./View/home.html');
             $list = getListMeasures($_SESSION['permission']);
 
-
-            $page .= '
+            $page = '
                 <div class="container">
-
                     <div class="row justify-content-center">
                         <div class="col-10"><h2>Unidades de Medida</h2></div>
                         <div class="col-10">'.$list.'</div>
                     </div>
                 <div>';
 
-            response(['page'=>$page]);
+            response(['page'=>json_encode($_SESSION)]);
         break;
         default:
-            response(['page'=>file_get_contents('./View/pageNotFound.html')]);
+            response(['page'=>file_get_contents('./pageNotFound.html')]);
         break; 
     }
 
 
-function getListMeasures($permission='read'){
+function getListMeasures($permission){
     $result = getItem('unit_measure');
 
     $items = '';
@@ -242,8 +240,8 @@ function getListMeasures($permission='read'){
                     ';
                 break;
             }
-
         }
+
         $items = '
             <ul class="list-group">
                 <li class="list-group-item list-group-item-primary">

@@ -1,10 +1,11 @@
 <?php
     if(!isset($_SESSION)) session_start();
     define('REQUEST_URI', explode('?', $_SERVER['REQUEST_URI'])[0]);
+    define('PATHS', explode('/', REQUEST_URI));
     define('PARCIAL_TOKEN', 'Senha forte: ');
-    // die('opa');
+
     require_once('./lib.php');
-    // response(['html' => json_encode($_GET)]);
+
     // TRATANDO REQUISIÇÕES DE ARQUIVOS JS E CSS
     if(isset($_GET['file'])  && $_GET['file']){
         // se busca um arquivo
@@ -28,7 +29,7 @@
             die();
         }
     }
-
+    
     // faz o logout e vai pra pagina inicial
     if(REQUEST_URI == '/logout'){
         require('./Controller/userController.php');
@@ -53,12 +54,6 @@
                 }
                 require_once('./Controller/userController.php');
             break;
-            case 'measure':
-                if(!isset($_SESSION['email']) || !$_SESSION['email']){
-                    response(['js'=> 'goTo("/")']);
-                }
-                require_once('./Controller/measureController.php');
-            break;
         }
     }
 
@@ -77,14 +72,20 @@
             response(['page' => get_content('./View/userLogin.html')]);
 
         break;
-        case REQUEST_URI == '/' && $_SESSION['email']:
+        case PATHS[1] == '' && $_SESSION['email']:
             response(['page'=>get_content('./View/home.html')]);
         break;
-        case REQUEST_URI == '/produtos' && $_SESSION['email']:
+        case PATHS[1] == 'produtos' && $_SESSION['email']:
             require_once('./Controller/productController.php');
         break;
-        case REQUEST_URI == '/unidades-medida' && $_SESSION['email']:
+        case PATHS[1] == 'unidades-medida' && $_SESSION['email']:
             require_once('./Controller/measureController.php');
+        break;
+        case PATHS[1] == 'fornecedores' && $_SESSION['email']:
+            require_once('./Controller/providerController.php');
+        break;
+        case PATHS[1] == 'fornecimentos' && $_SESSION['email']:
+            require_once('./Controller/supplyController.php');
         break;
         default:
             if(!sizeof($_GET)){
@@ -94,7 +95,7 @@
                     header('Location: /login');
                 }
             } else{
-                response(['html'=>'ola']);
+                response(['html'=>'ola', 'js'=>'console.log(\''.PATHS[1].'\')']);
             }
         break;
     }
