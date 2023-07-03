@@ -11,7 +11,7 @@
     }
 
 
-    // MEASURES - METHOD
+    // GetGlobal - METHOD
     if (!function_exists('getItem')) {
         function getItem($item, $id='') {
             require('config.php');
@@ -26,6 +26,6 @@
                 }
                 return $all_rows;
             }
-            return false;
+            return [];
         }
     }

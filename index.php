@@ -95,7 +95,7 @@
                     header('Location: /login');
                 }
             } else{
-                response(['html'=>'ola', 'js'=>'console.log(\''.PATHS[1].'\')']);
+                response(['html'=>get_content('./pageNotFound.html'), 'js'=>'console.log(\''.PATHS[1].'\')']);
             }
         break;
     }

@@ -1,5 +1,5 @@
 <?php
-    require_once('config.php');
+    require_once('./Model/config.php');
     if(REQUEST_URI == '/logout'){
         $return = '<script>delete window.user</script>';
         

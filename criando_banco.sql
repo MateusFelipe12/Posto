@@ -134,8 +134,6 @@ CREATE TABLE user (
 
 
 
-
-
 -- criando usuarios
 -- user principal, pode fazer o crud completo
  CREATE USER 'mateusrauber3@gmail.com'@'localhost' IDENTIFIED BY '123';
@@ -152,6 +150,8 @@ CREATE TABLE user (
 
 
 
+
+use posto;
 -- precedures
 -- vai atualizar o valor total dos fornecimentos apos a inserção de todos os produtos do fornecimento
 DELIMITER //
@@ -182,7 +182,7 @@ DROP TRIGGER IF EXISTS update_stock_products_supply_delete//
 CREATE TRIGGER update_stock_products_supply_delete
 before DELETE ON product_supply FOR EACH ROW
 BEGIN
-    UPDATE product AS p SET p.stock = p.stock - NEW.quantity WHERE code = NEW.code_product;
+    UPDATE product AS p SET p.stock = p.stock - old.quantity WHERE code = old.code_product;
 END//
 DELIMITER ;
 
