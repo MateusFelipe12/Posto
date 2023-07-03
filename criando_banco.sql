@@ -95,9 +95,11 @@ CREATE TABLE sale (
 -- PARCELA
 CREATE TABLE parcel (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id_sale INTEGER NOT NULL,
     value NUMERIC(8,2) NOT NULL DEFAULT 0,
     date_provider DATE NOT NULL,
-    date_effective TIMESTAMP
+    date_effective TIMESTAMP,
+    CONSTRAINT fk_sale_to_parcel FOREIGN KEY (id_sale) REFERENCES sale(id)
 );
 
 
@@ -137,7 +139,7 @@ CREATE TABLE user (
 -- criando usuarios
 -- user principal, pode fazer o crud completo
  CREATE USER 'mateusrauber3@gmail.com'@'localhost' IDENTIFIED BY '123';
- GRANT SELECT, INSERT, UPDATE, DELETE ON posto.* TO 'mateusrauber3@gmail.com'@'localhost';
+ GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE ON posto.* TO 'mateusrauber3@gmail.com'@'localhost';
 
 -- user basico, pode fazer apenas login e criar usuarios
  CREATE USER 'server'@'localhost' IDENTIFIED BY 'postodegasolina123';
@@ -149,5 +151,88 @@ CREATE TABLE user (
  GRANT SELECT ON posto.* TO 'read'@'localhost';
 
 
---  CREATE USER 'read'@'localhost' IDENTIFIED BY '123';
---  GRANT SELECT ON posto.* TO 'read'@'localhost';
+
+-- precedures
+-- vai atualizar o valor total dos fornecimentos apos a inserção de todos os produtos do fornecimento
+DELIMITER //
+DROP PROCEDURE IF EXISTS update_supply//
+CREATE PROCEDURE update_supply(id_supply INTEGER)
+BEGIN
+	UPDATE supply SET total = (
+    	SELECT SUM(ps.value_single) FROM product_supply AS ps WHERE ps.id_supply = id_supply
+    ) WHERE id = id_supply;
+END //
+DELIMITER ;
+
+
+-- METHODS
+-- ao criar um novo produto de um fornecimento atualiza o saldo
+DELIMITER //
+DROP TRIGGER IF EXISTS update_stock_products_supply//
+CREATE TRIGGER update_stock_products_supply
+before INSERT ON product_supply FOR EACH ROW
+BEGIN
+    UPDATE product AS p SET p.stock = p.stock + NEW.quantity WHERE code = NEW.code_product;
+END//
+DELIMITER ;
+
+-- ao deletar um produto de um fornecimento atualiza o saldo
+DELIMITER //
+DROP TRIGGER IF EXISTS update_stock_products_supply_delete//
+CREATE TRIGGER update_stock_products_supply_delete
+before DELETE ON product_supply FOR EACH ROW
+BEGIN
+    UPDATE product AS p SET p.stock = p.stock - NEW.quantity WHERE code = NEW.code_product;
+END//
+DELIMITER ;
+
+-- ao criar um novo produto de uma venda atualiza o saldo
+-- e ajusta o valor da venda
+DELIMITER //
+DROP TRIGGER IF EXISTS update_stock_products_sale//
+CREATE TRIGGER update_stock_products_sale
+before INSERT ON product_sale FOR EACH ROW
+BEGIN
+    UPDATE product AS p SET p.stock = p.stock - NEW.quantity WHERE code = NEW.code_product;
+    SET new.value_single = (SELECT value_sale from product WHERE code = NEW.code_product);
+END//
+DELIMITER ;
+
+-- ao deletar um produto de uma venda atualiza o saldo
+DELIMITER //
+DROP TRIGGER IF EXISTS update_stock_products_sale_delete//
+CREATE TRIGGER update_stock_products_sale_delete
+before DELETE ON product_sale FOR EACH ROW
+BEGIN
+    UPDATE product AS p SET p.stock = p.stock + OLD.quantity WHERE code = OLD.code_product;
+
+END//
+DELIMITER ;
+
+DELIMITER //
+DROP TRIGGER IF EXISTS update_stock_products_sale//
+CREATE TRIGGER update_stock_products_sale
+after INSERT ON product_sale FOR EACH ROW
+BEGIN
+    UPDATE sale AS s SET s.value_total = (SELECT calculate_order_total(NEW.id_sale)) WHERE id = NEW.id_sale;
+END//
+DELIMITER ;
+
+-- function
+-- usada para calcular o valor total de uma venda
+DELIMITER //
+DROP FUNCTION IF EXISTS calculate_order_total//
+CREATE FUNCTION calculate_order_total(order_id INT)
+RETURNS DECIMAL(10, 2)
+BEGIN
+    DECLARE total DECIMAL(10, 2);
+    
+    SELECT SUM(p.value_sale * ps.quantity) INTO total
+    FROM sale as s
+    JOIN product_sale as ps ON s.id = ps.id_sale
+    JOIN product as p ON ps.code_product = p.code
+    WHERE s.id = order_id;
+    
+    RETURN total;
+END//
+DELIMITER ;

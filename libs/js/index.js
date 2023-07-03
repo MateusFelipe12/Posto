@@ -49,7 +49,6 @@ const forDoAjax = () => {
         let url = $(this).attr('action');
         let method = $(this).attr('method');
         let data = $(this).serialize();
-
         switch(method.toLowerCase()){
             case 'post':
                 $.post(url+'&get=1', data, (e)=>{handleResponse(e)});
@@ -150,7 +149,7 @@ window.addEventListener('popstate', function (event) {
     goTo(event.state.page)
 })
 
-const addContacts = function(){
+const addForms = function(){
     let html_add_contact = '';
     $('body').on('click', '#add-new-contact-provider', function(){
         if(!html_add_contact.length){
@@ -163,12 +162,25 @@ const addContacts = function(){
         }
         $(this).closest('form').find('.row').append(html_add_contact);
     })
+    
+    let html_add_products = '';
+    $('body').on('click', '#add-new-product-supply', function(){
+        if(!html_add_products.length){
+            $(this).closest('form').find('.form-products-suplly').each(function(){
+                let classes = $(this).attr('class');
+                html_add_products += `<div class="${classes}">${
+                    $(this).html()
+                }</div>`;
+            })
+        }
+        $(this).closest('form').find('>.row').append(html_add_products);
+    })
 }
 
 const onload = function () {
     forDoAjax();
     modal_component();
-    addContacts();
+    addForms();
 };
 
 

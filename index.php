@@ -49,8 +49,8 @@
     if(isset($_GET['action'])){
         switch ($_GET['item']) {
             case 'user':
-                if(isset($_SESSION['email'])){
-                    response(['js'=> 'goTo("/")']);
+                if(isset($_SESSION['email']) && $_GET['action'] != 'set_permission' ){
+                    response(['js'=> 'goTo("/")'.$_GET['set_permission']]);
                 }
                 require_once('./Controller/userController.php');
             break;

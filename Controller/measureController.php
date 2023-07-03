@@ -118,6 +118,15 @@
     }
 
     if(isset($_GET['component'])){
+        switch($_SESSION['permission']){
+            case 'full':
+            case 'edit':
+                // continua  fluxo
+            break;
+            default:
+                response(['js' => 'Permissão negada', 'html' => 'Você não tem permissão para editar']); 
+            break;
+        }
         switch($_GET['component']){
             case 'edit':
                 $id = $_GET['id'];
@@ -180,16 +189,15 @@
 
         case 'read':
             $list = getListMeasures($_SESSION['permission']);
-
-            $page = '
+            $page = file_get_contents('./View/home.html');
+            $page .= '
                 <div class="container">
                     <div class="row justify-content-center">
-                        <div class="col-10"><h2>Unidades de Medida</h2></div>
                         <div class="col-10">'.$list.'</div>
                     </div>
                 <div>';
 
-            response(['page'=>json_encode($_SESSION)]);
+            response(['page'=>$page]);
         break;
         default:
             response(['page'=>file_get_contents('./pageNotFound.html')]);
@@ -206,7 +214,6 @@ function getListMeasures($permission){
         foreach($result as $row ) {
             switch($permission){
                 case 'full':
-                case 'edit': 
                     $options = '<div class="col-2">Opções</div>';
                     $items.= '
                         <li class="list-group-item">
@@ -219,6 +226,24 @@ function getListMeasures($permission){
                                     <button href="/unidades-medida/?item=measure&action=delete&id='.$row['id'].'" class="btn-danger p-1">
                                         <i class="bi bi-trash"></i>
                                     </button>
+                                    <button content_modal="/unidades-medida?item=measure&component=edit&id='.$row['id'].'"  class="btn-success p-1">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </li>
+                    ';
+                break;
+                case 'edit': 
+                    $options = '<div class="col-2">Opções</div>';
+                    $items.= '
+                        <li class="list-group-item">
+                            <div class="row">
+                                <div class="col-1">'.$row['id'].'</div>
+                                <div class="col-2">'.$row['description'].'</div>
+                                <div class="col-2">'.$row['symbol'].'</div>
+                                <div class="col-2">'.$row['fractions'].'</div>
+                                <div class="col-2">
                                     <button content_modal="/unidades-medida?item=measure&component=edit&id='.$row['id'].'"  class="btn-success p-1">
                                         <i class="bi bi-pencil"></i>
                                     </button>

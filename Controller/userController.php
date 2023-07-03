@@ -50,7 +50,74 @@
             }
 
         break;
-        
+        case $_GET['action'] == 'set_permission':
+            $permission = $_GET['permission'];
+
+            if(!$permission) response(['js'=>'$.toast(\'Ops, isso não funcionou\',\'error\')']);
+            else{
+                if(!isset($email)){
+                    $email = $_SESSION['email'];
+                }
+                $conn = new mysqli('localhost', 'root', '', 'posto');
+                
+                // primeiro valida se existe um usuario com esse email
+                $sql = 'select * from user where email = "'.$email.'"';
+                $result = $conn->query($sql);
+                
+                $conn_db = new mysqli('localhost', 'root', '', 'mysql');
+
+                if($result){
+
+                    $sql = 'CREATE USER \''.$email.'\'@\'localhost\' IDENTIFIED BY \'123\'';
+                    $result = $conn_db->query($sql);
+                    $sql = 'GRANT ';
+                    $to_or_from = 'TO';
+
+                    switch ($permission) {
+                        case 'full':
+                            $sql .= 'SELECT, ';
+                            $sql .= 'UPDATE, ';
+                            $sql .= 'INSERT, ';
+                            $sql .= 'EXECUTE, ';
+                            $sql .= 'DELETE' ;
+                        break;
+                        case 'edit':
+                            $sql .= 'SELECT, ';
+                            $sql .= 'UPDATE, ';
+                            $sql .= 'INSERT ';
+                        break;
+                        case 'read':
+                            $sql .= 'SELECT ';
+                        break;
+                        case 'remove':
+                            $sql = 'REVOKE ALL PRIVILEGES ';
+                            $to_or_from = 'from';
+
+
+                            $permission = '';
+                        break;
+                        default: 
+                            die('Ops, ocorreu um erro');
+                        break;
+                    }
+
+                    $sql .= ' ON posto.* '.$to_or_from.' \''.$email.'\'@\'localhost\';';
+                    $result = $conn_db->query($sql);
+                    
+                    if($result) {
+                        $sql = 'update user set permission = \''.$permission.'\' where email = "'.$email.'"';
+                        $result = $conn->query($sql);
+
+                        if($result) $_SESSION['permission'] = $permission;
+                        die('Permissão concedida');
+                    } else{
+                        response([$conn_db->error.'<br>'.$sql]);
+                    }
+                }
+            }
+            response(['js'=>'$.toast(\'Ops, ocorreu um erro\',\'error\');']);
+
+        break;
         case $_GET['action'] == 'login':
         default:
             if(isset($_SESSION['email'])){

@@ -7,112 +7,89 @@
                 extract($_POST);
 
                 if (
-                    !isset($description) || 
-                    !strlen(trim($description)) || 
-                    !isset($stock) || 
-                    !is_numeric(trim($stock)) ||
-                    !isset($measures_unit_code) || 
-                    !strlen(trim($measures_unit_code)) ||
-                    !isset($value) || 
-                    !strlen(trim($value))
+                    !isset($date) || 
+                    !isset($provider_supply) || 
+                    !is_numeric($provider_supply) ||
+                    !isset($PRODUCTS) || 
+                    !is_array($PRODUCTS) 
                 ) response(['js'=>'$.toast(\'Preencha todos os campos do formulário!\',\'warning\')']);
-
-                // remove as virgulas e etc e adiciona o . nas duas casas decimais
-                $value = preg_replace('/([,])/', '', $value);
-                $value = (float) substr($value,0,-2) .'.'. substr($value,-2) ;
-
-                // insere o produto
-                $sql = 'INSERT INTO product(description, value_sale, id_unit_measure, stock) VALUES ';
-                $sql .= '("'.$description.'",'.$value.','.$measures_unit_code.','.$stock.')';
                 
-                $result = $conn->query($sql);
-                
-                // se consegui inserir vai retornar
-                if($result){
-                    $js = '$.toast(\'Produto inserido com sucesso #'.($conn->insert_id).'\', \'success\');';
-                    $js .= 'goTo(window.location.pathname);';
-                    response(['js'=>$js]);
-                } else{
-                    $js = '$.toast(\'Ocorreu um erro ao inserir o produto\', \'error\');';
-                    $js .= 'console.log(\''.$sql.'\');';
-                    response(['js'=>$js]);
-                }
-            break;
-
-            case 'edit':
-                extract($_POST);
-
-                if( 
-                    !isset( $code ) ||  
-                    !is_numeric( $code ) ||
-                    !isset($description) || 
-                    !strlen(trim($description)) || 
-                    !isset($value) || 
-                    !is_numeric(trim($value)) || 
-                    !isset($measures_unit_code) || 
-                    !is_numeric(trim($measures_unit_code)) || 
-                    !isset($stock) || 
-                    !is_numeric(trim($stock))
-                ) response(['js'=>'$.toast(\'Informe todos os campos!\',\'warning\')']);
-                
-                // Verifica se o produto que esta sendo editado existe
-                $sql = 'SELECT code FROM product where code = '.$code;
-                
+                $sql = 'SELECT id from provider where id_legal_person = '.$provider_supply;
                 $result = $conn->query($sql);
                 $result = $result->fetch_assoc();
-                // se existe
-                if( $result['code'] ){
-                    // formata o valor
-                    $value = preg_replace('/([,])/', '', $value);
-                    $value = (float) substr($value,0,-2) .'.'. substr($value,-2) ;
+                $provider_supply = $result['id'];
 
-                    // atualiza o produto
-                    $sql = 'UPDATE product SET '.
-                    'description = "'.$description.'",'.
-                    'stock = "'.$stock.'",'.
-                    'id_unit_measure = "'.$measures_unit_code.'",'.
-                    'value_sale = "'.$value.'"'.
-                    'WHERE code = '.$code;;
+                $value_total = 0;
+                // insere o produto
+                $sql = 'INSERT INTO supply(date, total, id_provider) VALUES ';
+                $sql .= '("'.date("Y-m-d H:i:s", strtotime($date)).'",'.$value_total.','.$provider_supply.')';
+                
+                $result = $conn->query($sql);
+
+                // se consegui inserir vai retornar
+                if($result && $conn->insert_id || 1){
+                    $id_supply = $conn->insert_id;
+                    while(sizeof($PRODUCTS) ) {
+                        
+                        list($id, $quantity, $value) = $PRODUCTS;
+                        for ($i = 0; $i < 3; $i++) array_shift($PRODUCTS);
+
+                        $id = $id ['id'];
+                        $quantity = $quantity ['quantity'];
+                        $value = $value ['value'];
+
+                        // remove as virgulas e etc e adiciona o . nas duas casas decimais
+                        $value = preg_replace('/([,])/', '', $value);
+                        $value = (float) substr($value,0,-2) .'.'. substr($value,-2) ;
+
+                        $sql = 'INSERT INTO product_supply (code_product, id_supply, quantity, value_single) VALUES';
+                        $sql .= '('.$id.','. $id_supply.','.$quantity.','. $value.');';
+
+                        $conn->query($sql);
+                        
+                    }
                     
-                    $result = $conn->query($sql);
+                    $sql = 'call update_supply('.$id_supply.');';
 
-                    // se deu certo retorna
-                    if( $result ) {
-                        $js = '$.toast(\'Produto atualizado com sucesso\', \'success\');';
-                        $js .= 'goTo( window.location.pathname )';
+                    $result = $conn->query($sql);
+                    if($result){
+                        $js = '$.toast(\'Fornecimento inserido com sucesso #'.($id_supply).'\', \'success\');';
+                        $js .= 'goTo(window.location.pathname);';
                         response(['js'=>$js]);
                     }
-                    // se não retorna o erro
-                    $js = '$.toast(\'Ocorreu um erro ao editar, recarregue a página!\', \'error\');';
-                    $js = 'console.log(\''.$sql.'\');';
-                    response(['js'=>$js]);
+                } 
 
-                } else{
-                    $js = '$.toast(\'Registro não encontrado, recarregue a página!\', \'warning\');';
-                    $js .= 'console.log(\''.$sql.'\')';
-                    response(['js'=>$js]);
-                }
+                $js = '$.toast(\'Ocorreu um erro ao criar o fornecimento\', \'error\');';
+                $js .= 'console.log(\''.$sql.'\');';
+                $js .= 'console.log(\''.$conn->error.'\');';
+                response(['js'=>$js]);
             break;
 
             case 'delete':
-                $code = $_GET['code'];
+                $id = $_GET['id'];
 
-                if( !isset( $code ) ||  !is_numeric( $code ) ) response(['js'=>'$.toast(\'Ocorreu um erro, recarregue a página!\',\'warning\')']);
+                if( !isset( $id ) ||  !is_numeric( $id ) ) response(['js'=>'$.toast(\'Ocorreu um erro, recarregue a página!\',\'warning\')']);
 
-                $sql = 'SELECT code FROM product where code = '.$code;
+                $sql = 'SELECT id FROM supply where id = '.$id;
                 
                 $result = $conn->query($sql);
                 $result = $result->fetch_assoc();
                 
-                if( $result['code'] ){
-                    $sql = 'DELETE FROM product where code = '.$code;
+                if( $result['id'] ){
+                    $sql = 'DELETE FROM product_supply where id_supply = '.$id;
                     
                     $result = $conn->query($sql);
-
+                    
                     if( $result ) {
-                        $js = '$.toast(\'Produto deletado com sucesso\', \'success\');';
-                        $js .= 'goTo( window.location.pathname )';
-                        response(['js'=>$js]);
+                        $sql = 'DELETE FROM supply where id = '.$id;
+                        
+                        $result = $conn->query($sql);
+                        
+                        if( $result ) {
+                            $js = '$.toast(\'Produto deletado com sucesso\', \'success\');';
+                            $js .= 'goTo( window.location.pathname )';
+                            response(['js'=>$js]);
+                        }
                     }
 
                     $js = '$.toast(\'Ocorreu um erro ao deletar, recarregue a página!\', \'error\');';
@@ -135,6 +112,15 @@
     }
 
     if(isset($_GET['component'])){
+        switch($_SESSION['permission']){
+            case 'full':
+            case 'edit':
+                // continua  fluxo
+            break;
+            default:
+                response(['js' => 'Permissão negada', 'html' => 'Você não tem permissão para editar']); 
+            break;
+        }
         switch($_GET['component']){
             case 'edit':
                 $code = $_GET['code'];
@@ -192,25 +178,42 @@
         case 'edit': 
         case 'full': 
             $page = get_content('./View/supplyAdd.html');
-            $list_providers = getItem('provider');
             
-            $options_provider = [['', 'Selecione o fornecedor']];
-            foreach ($list_providers as  $provider) {
-                $options_provider[] = [$provider['id'], $provider['name_fantasy']];
+            $list_providers = getItem('provider, legal_person');
+            $options_providers = [['', 'Selecione um fornecedor']];
+            foreach ($list_providers as  $value) {
+                $options_providers[] = [$value['id'], $value['name_fantasy']];
             }
 
-            $select_providers = 
+            $select_measures = 
+                input([
+                    'Informe o fornecedor', 
+                    'select',
+                    'provider_supply',
+                    '',
+                    $options_providers
+                ]);
+
+            $list_products = getItem('product');
+            $options_products = [['', 'Selecione o produto']];
+            foreach ($list_products as  $value) {
+                $options_products[] = [$value['code'], $value['description']];
+            }
+
+            $select_products = 
                 input([
                     '', 
                     'select',
-                    'id_provider',
+                    'PRODUCTS[][id]',
                     '',
-                    $options_provider
+                    $options_products
                 ]);
+        
 
-            $list_products = getListSupply($_SESSION['permission']);
-            $page = str_replace('{select-providers}', $select_providers, $page) ;
-            $page = str_replace('{list_supplies}', $list_products, $page) ;
+            $list_supplies = getListSupply($_SESSION['permission']);
+            $page = str_replace('{select-products}', $select_products, $page) ;
+            $page = str_replace('{select-providers}', $select_measures, $page) ;
+            $page = str_replace('{list_supplies}', $list_supplies   , $page) ;
             
             $page = get_content('./View/home.html').'
                 <div class="container">
@@ -221,47 +224,65 @@
 
             response(['page'=>$page]);
         break; 
-
+        
+        case 'read': 
+            $list_products = getListSupply($_SESSION['permission']);
+            $page = $list_products;
+            
+            $page = get_content('./View/home.html').'
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-10">'.$page.'</div>
+                    </div>
+                <div>';
+    
+            response(['page'=>$page]);
+                
+            
+        break; 
         default:
-            response(['page'=>get_content('./View/pageNotFound.html')]);
+            response(['page'=>get_content('./pageNotFound.html')]);
         break; 
     }
 
 
     function getListSupply($permission){
-        $result = getItem('unit_measure');
-        $UNIT_MEASURES = [];
-        foreach ($result as $value) {
-            $UNIT_MEASURES[$value['id']] = $value; 
-        }
-        
-        $result = getItem('product');
+        $result = getItem('supply');
+        require('config.php');
         $items = '';
         if($result){
             $options = '';
             foreach($result as $row ) {
-                $row['stock'] = substr($row['stock'], 0, -3);
-                $row['value_sale'] = 'R$ '.str_replace('.',',',$row['value_sale']);
+                $sql = 'select name_fantasy from legal_person where id = (select id_legal_person from provider where id = '. $row['id_provider'].')';
+                $provider = $conn->query($sql);
+                $provider = ($provider->fetch_assoc()['name_fantasy']);
+                $date = date('d/m/Y',strtotime($row['date']));
+
                 switch($permission){
                     case 'full':
-                    case 'edit': 
                         $options = '<div class="col-2">Opções</div>';
                         $items.= '
                             <li class="list-group-item">
                                 <div class="row">
-                                    <div class="col-1">'.$row['code'].'</div>
-                                    <div class="col-2">'.$row['description'].'</div>
-                                    <div class="col-2">'.$row['stock'].'</div>
-                                    <div class="col-2">'.$row['value_sale'].'</div>
-                                    <div class="col-3">'.$UNIT_MEASURES[$row['id_unit_measure']]['description'].'</div>
+                                    <div class="col-1">'.$row['id'].'</div>
+                                    <div class="col-3">'.$provider.'</div>
+                                    <div class="col-2">'.$date.'</div>
                                     <div class="col-2">
-                                        <button href="/produtos/?item=product&action=delete&code='.$row['code'].'" class="btn-danger p-1">
+                                        <button href="/fornecimentos/?item=supply&action=delete&id='.$row['id'].'" class="btn-danger p-1">
                                             <i class="bi bi-trash"></i>
                                         </button>
-                                        <button content_modal="/produtos?item=product&component=edit&code='.$row['code'].'"  class="btn-success p-1">
-                                            <i class="bi bi-pencil"></i>
-                                        </button>
                                     </div>
+                                </div>
+                            </li>
+                        ';
+                    break;
+                    case 'edit': 
+                        $items.= '
+                            <li class="list-group-item">
+                                <div class="row">
+                                    <div class="col-1">'.$row['id'].'</div>
+                                    <div class="col-3">'.$provider.'</div>
+                                    <div class="col-2">'.$date.'</div>
                                 </div>
                             </li>
                         ';
@@ -270,11 +291,9 @@
                         $items.= '
                             <li class="list-group-item">
                                 <div class="row">
-                                    <div class="col-1">'.$row['code'].'</div>
-                                    <div class="col-2">'.$row['description'].'</div>
-                                    <div class="col-2">'.$row['stock'].'</div>
-                                    <div class="col-2">'.$row['value_sale'].'</div>
-                                    <div class="col-3">'.$UNIT_MEASURES[$row['id_unit_measure']]['description'].'</div>
+                                    <div class="col-1">'.$row['id'].'</div>
+                                    <div class="col-3">'.$provider.'</div>
+                                    <div class="col-2">'.$date.'</div>
                                 </div>
                             </li>
                         ';
@@ -287,10 +306,8 @@
                     <li class="list-group-item list-group-item-primary">
                         <div class="row">
                             <div class="col-1">#</div>
-                            <div class="col-2">Descrição</div>
-                            <div class="col-2">Estoque</div>
-                            <div class="col-2">Valor</div>
-                            <div class="col-3">Unidade de Medida</div>'.
+                            <div class="col-3">Fornecedor</div>
+                            <div class="col-2">Data</div>'.
                             $options.'
                         </div>
                     </li>'.$items.'

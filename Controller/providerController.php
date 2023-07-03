@@ -218,6 +218,15 @@
     }
 
     if(isset($_GET['component'])){
+        switch($_SESSION['permission']){
+            case 'full':
+            case 'edit':
+                // continua  fluxo
+            break;
+            default:
+                response(['js' => 'Permissão negada', 'html' => 'Você não tem permissão para editar']); 
+            break;
+        }
         switch($_GET['component']){
             case 'edit':
                 $id = $_GET['id'];
@@ -317,7 +326,6 @@
                 $row['cnpj']  = preg_replace('/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/', '$1.$2.$3/$4-$5', $row['cnpj']);
                 switch($permission){
                     case 'full':
-                    case 'edit': 
                         $options = '<div class="col-2">Opções</div>';
                         $items.= '
                             <li class="list-group-item">
@@ -330,6 +338,24 @@
                                         <button href="/fornecedores/?item=provider&action=delete&id='.$row['id'].'" class="btn-danger p-1">
                                             <i class="bi bi-trash"></i>
                                         </button>
+                                        <button content_modal="/fornecedores?item=provider&component=edit&id='.$row['id'].'"  class="btn-success p-1">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </li>
+                        ';
+                    break;
+                    case 'edit': 
+                        $options = '<div class="col-2">Opções</div>';
+                        $items.= '
+                            <li class="list-group-item">
+                                <div class="row">
+                                    <div class="col-3">'.$row['cnpj'].'</div>
+                                    <div class="col-3">'.$row['name_fantasy'].'</div>
+                                    <div class="col-2">'.$row['agency'].'</div>
+                                    <div class="col-2">'.$row['account'].'</div>
+                                    <div class="col-2">
                                         <button content_modal="/fornecedores?item=provider&component=edit&id='.$row['id'].'"  class="btn-success p-1">
                                             <i class="bi bi-pencil"></i>
                                         </button>

@@ -135,6 +135,15 @@
     }
 
     if(isset($_GET['component'])){
+        switch($_SESSION['permission']){
+            case 'full':
+            case 'edit':
+                // continua  fluxo
+            break;
+            default:
+                response(['js' => 'Permissão negada', 'html' => 'Você não tem permissão para editar']); 
+            break;
+        }
         switch($_GET['component']){
             case 'edit':
                 $code = $_GET['code'];
@@ -260,7 +269,6 @@
                 $row['value_sale'] = 'R$ '.str_replace('.',',',$row['value_sale']);
                 switch($permission){
                     case 'full':
-                    case 'edit': 
                         $options = '<div class="col-2">Opções</div>';
                         $items.= '
                             <li class="list-group-item">
@@ -274,6 +282,25 @@
                                         <button href="/produtos/?item=product&action=delete&code='.$row['code'].'" class="btn-danger p-1">
                                             <i class="bi bi-trash"></i>
                                         </button>
+                                        <button content_modal="/produtos?item=product&component=edit&code='.$row['code'].'"  class="btn-success p-1">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </li>
+                        ';
+                    break;
+                    case 'edit': 
+                        $options = '<div class="col-2">Opções</div>';
+                        $items.= '
+                            <li class="list-group-item">
+                                <div class="row">
+                                    <div class="col-1">'.$row['code'].'</div>
+                                    <div class="col-2">'.$row['description'].'</div>
+                                    <div class="col-2">'.$row['stock'].'</div>
+                                    <div class="col-2">'.$row['value_sale'].'</div>
+                                    <div class="col-3">'.$UNIT_MEASURES[$row['id_unit_measure']]['description'].'</div>
+                                    <div class="col-2">
                                         <button content_modal="/produtos?item=product&component=edit&code='.$row['code'].'"  class="btn-success p-1">
                                             <i class="bi bi-pencil"></i>
                                         </button>
