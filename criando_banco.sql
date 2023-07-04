@@ -189,8 +189,8 @@ DELIMITER ;
 -- ao criar um novo produto de uma venda atualiza o saldo
 -- e ajusta o valor da venda
 DELIMITER //
-DROP TRIGGER IF EXISTS update_stock_products_sale//
-CREATE TRIGGER update_stock_products_sale
+DROP TRIGGER IF EXISTS update_stock_products_sale_insert//
+CREATE TRIGGER update_stock_products_sale_insert
 before INSERT ON product_sale FOR EACH ROW
 BEGIN
     UPDATE product AS p SET p.stock = p.stock - NEW.quantity WHERE code = NEW.code_product;
@@ -205,13 +205,12 @@ CREATE TRIGGER update_stock_products_sale_delete
 before DELETE ON product_sale FOR EACH ROW
 BEGIN
     UPDATE product AS p SET p.stock = p.stock + OLD.quantity WHERE code = OLD.code_product;
-
 END//
 DELIMITER ;
 
 DELIMITER //
-DROP TRIGGER IF EXISTS update_stock_products_sale//
-CREATE TRIGGER update_stock_products_sale
+DROP TRIGGER IF EXISTS update_total_products_sale//
+CREATE TRIGGER update_total_products_sale
 after INSERT ON product_sale FOR EACH ROW
 BEGIN
     UPDATE sale AS s SET s.value_total = (SELECT calculate_order_total(NEW.id_sale)) WHERE id = NEW.id_sale;
