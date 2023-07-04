@@ -136,6 +136,7 @@ CREATE TABLE user (
 
 -- criando usuarios
 -- user principal, pode fazer o crud completo
+use mysql;
  CREATE USER 'mateusrauber3@gmail.com'@'localhost' IDENTIFIED BY '123';
  GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE ON posto.* TO 'mateusrauber3@gmail.com'@'localhost';
 

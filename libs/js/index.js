@@ -26,21 +26,37 @@ $.toast = (text, type='') => {
     return true;
 }
 
-const setItemStorage = (item) => {
-    if (!window[item]) window[item] = [];
-    localStorage.setItem(item, JSON.stringify(window[item]));
-    return window[item];
-}
+$('#root').on('keyup', '[name="cnpj"]', function(){
+    $(this).val(formatValue($(this).val(), 'cnpj'));
+})
 
-const getItemStorage = (item) => {
-    window[item] = JSON.parse(localStorage.getItem(item));
-    if (!window[item]) window[item] = [];
-    return window[item];
-}
+$('#root').on('keyup', '[name="state_registration"]', function(){
+    $(this).val(formatValue($(this).val(), 'state_registration'));
+})
 
-const clearStorage = (item) => {
-    delete window[item];
-    localStorage.removeItem(item)
+// $('#root').on('keyup', '[placeholder="Contato"]', function(){
+//     $(this).val(formatValue($(this).val(), 'telefone'));
+// })
+
+const formatValue = function(value, type) {
+    switch (type) {
+        case 'cpf':
+            return value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4'); // Formata CPF
+        break;
+        case 'telefone':
+            value = value.replace(/\D/g, '').slice(0,11)
+            return value.replace(/(\d{2})(\d{1})(\d{4})(\d{4})/, '($1) $2 $3-$4'); // Formata CNPJ
+        break;
+        case 'cnpj':
+            value = value.replace(/\D/g, '').slice(0,14)
+            return value.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5'); // Formata CNPJ
+        break;
+        case 'state_registration':
+            value = value.replace(/\D/g, '').slice(0,9)
+            return value.replace(/(\d{2})(\d{3})(\d{3})(\d{1})/, '$1.$2.$3-$4'); // Formata CNPJ
+        break;
+    }
+    return value;
 }
 
 const forDoAjax = () => {

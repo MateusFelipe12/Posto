@@ -8,12 +8,15 @@
         } else{
             $return .= '<script>goTo(\'/login\')</script></body>';
         }
-
         unset($_SESSION['email']);
         unset($_SESSION['permission']);
         unset($_SESSION['name']);
+        
+        if(isset($_GET['get']) && $_GET['get']){
+            response(['js'=>'goTo("/login")']);
+        }
 
-        header('Location: /login?get=1');
+        header('Location: /login');
         echo($return);
     }
 
